@@ -9,43 +9,43 @@ This application provides advanced features for processing PDF documents, genera
 
 1. **Upload PDFs**
    - Upload multiple PDF files for text extraction and processing.
-   ![Upload PDFs Screenshot](images/Screenshot%202025-01-26%20202439.png)
+
 
 2. **Generate Enhanced Summaries**
    - Create detailed summaries from the uploaded documents using AI-enhanced methods.
-   ![Generate Enhanced Summaries](image2)
+
 
 3. **Contextual Question & Answering**
    - Ask specific questions about the content of the uploaded documents and get accurate answers based on the context.
-   ![Contextual Question & Answering](image3)
+
 
 4. **Study Planner**
    - Generate a personalized study plan based on user preferences like study hours per day and total weeks available.
-   ![Study Planner](image4)
+
 
 5. **Advanced Study Plan**
    - If advanced AI-enhanced study planning fails, the application falls back to a simpler study plan generator.
-   ![Advanced Study Plan](image5)
+
 
 6. **List Uploaded Files**
    - View all the uploaded files in the application.
-   ![List Uploaded Files](image6)
+
 
 7. **Generate Topics**
    - Extract key topics from the uploaded documents for a structured study approach.
-   ![Generate Topics](Images/Screenshot 2025-01-26 202500.png)
+
 
 8. **Generate MCQs**
    - Create multiple-choice questions for any selected topic to aid in learning and assessment.
-   ![Generate MCQs](image8)
+
 
 9. **Delete Files**
    - Remove uploaded files from the application as needed.
-   ![Delete Files](image9)
+
 
 10. **Reset Application State**
     - Reset the application state to clear all uploaded files and processed data.
-    ![Reset Application State](image10)
+
 
 ---
 
