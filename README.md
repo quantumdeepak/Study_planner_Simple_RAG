@@ -9,7 +9,7 @@ This application provides advanced features for processing PDF documents, genera
 
 1. **Upload PDFs**
    - Upload multiple PDF files for text extraction and processing.
-   ![Upload PDFs](image1)
+   ![Upload PDFs](Images/Screenshot 2025-01-26 202439.png)
 
 2. **Generate Enhanced Summaries**
    - Create detailed summaries from the uploaded documents using AI-enhanced methods.
