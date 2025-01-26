@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Uploaded Files</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-6">
+    <div class="container mx-auto">
+        <h1 class="text-2xl font-bold mb-4">Uploaded Files</h1>
+
+        <div id="fileList" class="bg-white shadow-md rounded-lg p-4">
+            <!-- Files will be dynamically loaded here -->
+        </div>
+
+        <div class="mt-4 space-x-4">
+            <button onclick="loadFiles()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                Refresh File List
+            </button>
+            <a href="index.html" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+                Back to Home
+            </a>
+        </div>
+
+        <div class="mt-6">
+            <a href="/generate_summary" class="bg-green-500 hover:bg-green-700 text-white px-4 py-2 rounded">
+                Generate Summary
+            </a>
+            <a href="/question_answer" class="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded">
+                Q&A
+            </a>
+            <a href="/study_plan" class="bg-purple-500 hover:bg-purple-700 text-white px-4 py-2 rounded">
+                Study Plan
+            </a>
+        </div>
+    </div>
+
+    <script>
+        function loadFiles() {
+            fetch('/list_files')
+                .then(response => {
+                    if (!response.ok) throw new Error(`Failed to fetch files: ${response.statusText}`);
+                    return response.json();
+                })
+                .then(data => {
+                    const fileListEl = document.getElementById('fileList');
+                    if (data.files && data.files.length > 0) {
+                        fileListEl.innerHTML = `
+                            <h2 class="text-xl font-semibold mb-2">
+                                Total Files: ${data.files.length}
+                            </h2>
+                            ${data.files.map(file => 
+                                `<div class="bg-gray-100 p-2 mb-2 rounded flex justify-between items-center">
+                                    <a href="/files/${file}" target="_blank" class="text-blue-500 hover:underline">${file}</a>
+                                    <button onclick="deleteFile('${file}')" class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded text-sm">
+                                        Delete
+                                    </button>
+                                </div>`
+                            ).join('')}
+                        `;
+                    } else {
+                        fileListEl.innerHTML = '<p class="text-gray-500">No files uploaded yet.</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to load files');
+                });
+        }
+
+        function deleteFile(filename) {
+            fetch(`/delete_file?name=${encodeURIComponent(filename)}`, {
+                method: 'DELETE'
+            })
+            .then(response => {
+                if (!response.ok) throw new Error(`Failed to delete file: ${response.statusText}`);
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    loadFiles(); // Refresh the file list after deletion
+                } else {
+                    alert(data.message || 'File deletion failed.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to delete file');
+            });
+        }
+
+        // Load files on page load
+        document.addEventListener('DOMContentLoaded', loadFiles);
+    </script>
+</body>
+</html>

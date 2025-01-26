@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Personalized Study Plan</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .week {
+            background-color: #f4f4f4;
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .topic {
+            margin-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+        .topic-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .progress-container {
+            width: 100%;
+            background-color: #e0e0e0;
+            padding: 3px;
+            border-radius: 3px;
+            margin-top: 10px;
+        }
+        .progress-bar {
+            width: 0%;
+            height: 20px;
+            background-color: #4CAF50;
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+        .activities {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Your Personalized Study Plan</h1>
+
+    {% for week in plan %}
+    <div class="week">
+        <h2>Week {{ week.week }} (Starting {{ week.start_date }})</h2>
+        <p>Total Study Hours: {{ week.total_study_hours }}</p>
+        
+        {% for topic in week.topics %}
+        <div class="topic">
+            <div class="topic-header">
+                <h3>{{ topic.name }}</h3>
+                <div>
+                    <span>Study Hours: {{ topic.hours }}</span>
+                    <input 
+                        type="checkbox" 
+                        class="topic-checkbox"
+                        data-topic="{{ topic.name }}"
+                        onchange="updateProgress(this)"
+                    >
+                </div>
+            </div>
+
+            <div class="progress-container">
+                <div 
+                    class="progress-bar" 
+                    id="progress-{{ topic.name|replace(' ', '-') }}"
+                ></div>
+            </div>
+
+            <div class="activities">
+                <strong>Activities:</strong>
+                <ul>
+                    {% for activity in topic.activities %}
+                    <li>{{ activity }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endfor %}
+
+    <script>
+        function updateProgress(checkbox) {
+            const topicName = checkbox.getAttribute('data-topic');
+            const progressBar = document.getElementById(`progress-${topicName.replace(/ /g, '-')}`);
+            
+            if (checkbox.checked) {
+                progressBar.style.width = '100%';
+            } else {
+                progressBar.style.width = '0%';
+            }
+        }
+    </script>
+</body>
+</html>

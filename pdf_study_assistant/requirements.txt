@@ -1,0 +1,23 @@
+# Flask and Web
+flask
+
+# PDF Processing
+PyPDF2
+
+# Natural Language Processing
+nltk
+sentence-transformers
+
+# Vector Database
+faiss-cpu
+
+# AI and ML
+google-generativeai
+
+# Additional dependencies
+numpy
+
+# Development and Debugging
+#gunicorn
+
+python-dotenv

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document Q&A</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .qa-container {
+            background-color: #f4f4f4;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        form {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            flex-grow: 1;
+            padding: 10px;
+            margin-right: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        .answer {
+            white-space: pre-wrap;
+            background-color: #e9e9e9;
+            padding: 15px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Document Question Answering</h1>
+    
+    <!-- <form method="POST">
+        <input type="text" name="query" placeholder="Ask a question about the uploaded documents" required>
+        <button type="submit">Ask</button>
+    </form> -->
+    <form method="post">
+        <input type="text" name="query" required>
+        <button type="submit">Ask Question</button>
+    </form>
+
+    {% if query %}
+    <div class="qa-container">
+        <h2>Your Question:</h2>
+        <p>{{ query }}</p>
+        
+        <h2>Answer:</h2>
+        <div class="answer">{{ answer }}</div>
+    </div>
+    {% endif %}
+
+    <a href="/" style="display: block; text-align: center; margin-top: 20px; text-decoration: none; padding: 10px; background-color: #4CAF50; color: white; border-radius: 5px;">Back to Home</a>
+</body>
+</html>

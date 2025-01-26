@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Study Plan Configuration</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; }
+        form { display: flex; flex-direction: column; }
+        label { margin-top: 10px; }
+        input { margin-bottom: 15px; padding: 5px; }
+        button { padding: 10px; background-color: #4CAF50; color: white; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Create Your Study Plan</h1>
+    <form method="post">
+        <label for="study_hours">How many hours can you study daily?</label>
+        <input type="number" id="study_hours" name="study_hours" min="1" max="8" required value="2">
+        
+        <label for="total_weeks">How many weeks do you want to plan for?</label>
+        <input type="number" id="total_weeks" name="total_weeks" min="1" max="12" required value="4">
+        
+        <button type="submit">Generate Study Plan</button>
+    </form>
+</body>
+</html>
