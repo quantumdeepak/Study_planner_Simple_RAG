@@ -2,25 +2,113 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Study Plan Configuration</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; }
-        form { display: flex; flex-direction: column; }
-        label { margin-top: 10px; }
-        input { margin-bottom: 15px; padding: 5px; }
-        button { padding: 10px; background-color: #4CAF50; color: white; border: none; cursor: pointer; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #9ef6a5; /* Light green background */
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Slightly enhanced shadow */
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #4CAF50;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        input {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1rem;
+            margin-bottom: 15px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            border-color: #4CAF50;
+            outline: none;
+        }
+
+        button {
+            padding: 10px;
+            font-size: 1rem;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: #777;
+        }
+
+        .footer a {
+            color: #4CAF50;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
-    <h1>Create Your Study Plan</h1>
-    <form method="post">
-        <label for="study_hours">How many hours can you study daily?</label>
-        <input type="number" id="study_hours" name="study_hours" min="1" max="8" required value="2">
-        
-        <label for="total_weeks">How many weeks do you want to plan for?</label>
-        <input type="number" id="total_weeks" name="total_weeks" min="1" max="12" required value="4">
-        
-        <button type="submit">Generate Study Plan</button>
-    </form>
+    <div class="container">
+        <h1>Create Your Study Plan</h1>
+        <form method="post">
+            <label for="study_hours">How many hours can you study daily?</label>
+            <input type="number" id="study_hours" name="study_hours" min="1" max="8" required value="2">
+            
+            <label for="total_weeks">How many weeks do you want to plan for?</label>
+            <input type="number" id="total_weeks" name="total_weeks" min="1" max="12" required value="4">
+            
+            <button type="submit">Generate Study Plan</button>
+        </form>
+        <div class="footer">
+            <p>Need help? <a href="#">Contact us</a></p>
+        </div>
+    </div>
 </body>
 </html>

@@ -2,49 +2,156 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Personalized Study Plan</title>
     <style>
+        /* General Styles */
         body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 900px;
             margin: 0 auto;
             padding: 20px;
-            line-height: 1.6;
+            line-height: 1.8;
+            background-color: #7bb9e2;
+            color: #333;
         }
-        .week {
-            background-color: #f4f4f4;
-            margin-bottom: 20px;
-            padding: 15px;
-            border-radius: 5px;
-        }
-        .topic {
-            margin-bottom: 15px;
-            border-bottom: 1px solid #ddd;
+    
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            border-bottom: 3px solid #4caf50;
             padding-bottom: 10px;
+            margin-bottom: 30px;
+            font-size: 2em;
         }
+    
+        /* Weekly Section Styles */
+        .week {
+            background-color: #ffffff;
+            margin-bottom: 25px;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+    
+        .week h2 {
+            color: #1abc9c;
+            border-bottom: 2px solid #16a085;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+    
+        /* Topic Section Styles */
+        .topic {
+            margin-bottom: 20px;
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 6px;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+    
+        .topic:hover {
+            background-color: #f1f1f1;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+        }
+    
         .topic-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 10px;
         }
+    
+        .topic-header h3 {
+            margin: 0;
+            color: #34495e;
+            font-size: 1.2em;
+        }
+    
+        /* Priority Badge Styles */
+        .priority-badge {
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.8em;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+    
+        .priority-high {
+            background-color: #e74c3c;
+            color: white;
+        }
+    
+        .priority-medium {
+            background-color: #f39c12;
+            color: white;
+        }
+    
+        .priority-low {
+            background-color: #3498db;
+            color: white;
+        }
+    
+        /* Progress Bar Styles */
         .progress-container {
             width: 100%;
             background-color: #e0e0e0;
-            padding: 3px;
-            border-radius: 3px;
-            margin-top: 10px;
+            padding: 4px;
+            border-radius: 6px;
+            margin-top: 15px;
         }
+    
         .progress-bar {
             width: 0%;
             height: 20px;
-            background-color: #4CAF50;
-            border-radius: 3px;
+            background-color: #2ecc71;
+            border-radius: 4px;
             transition: width 0.5s ease;
         }
+    
+        /* Activities Section */
         .activities {
-            margin-top: 10px;
+            margin-top: 15px;
+        }
+    
+        .activities ul {
+            list-style-type: disc;
+            padding-left: 20px;
+        }
+    
+        /* Overall Progress Section */
+        #overall-progress-container {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+        }
+    
+        /* Add to Home Screen Button */
+        #add-home-screen {
+            display: block;
+            margin: 20px auto;
+            padding: 12px 24px;
+            background-color: #007bff;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 1em;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+    
+        #add-home-screen:hover {
+            background-color: #0056b3;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
         }
     </style>
+    
+
 </head>
 <body>
     <h1>Your Personalized Study Plan</h1>
@@ -53,35 +160,33 @@
     <div class="week">
         <h2>Week {{ week.week }} (Starting {{ week.start_date }})</h2>
         <p>Total Study Hours: {{ week.total_study_hours }}</p>
-        
+
         {% for topic in week.topics %}
         <div class="topic">
             <div class="topic-header">
                 <h3>{{ topic.name }}</h3>
-                <div>
-                    <span>Study Hours: {{ topic.hours }}</span>
-                    <input 
-                        type="checkbox" 
-                        class="topic-checkbox"
-                        data-topic="{{ topic.name }}"
-                        onchange="updateProgress(this)"
-                    >
-                </div>
+                <input 
+                    type="checkbox" 
+                    class="topic-checkbox"
+                    data-topic="{{ topic.name }}"
+                    onchange="updateProgress(this)"
+                >
             </div>
 
             <div class="progress-container">
                 <div 
                     class="progress-bar" 
                     id="progress-{{ topic.name|replace(' ', '-') }}"
-                ></div>
+                    style="width: 0%;"></div>
             </div>
 
             <div class="activities">
                 <strong>Activities:</strong>
                 <ul>
-                    {% for activity in topic.activities %}
-                    <li>{{ activity }}</li>
-                    {% endfor %}
+                    <li>In-depth study of the topic</li>
+                    <li>Create summary notes</li>
+                    <li>Practice self-assessment</li>
+                    <li>Identify and fill knowledge gaps</li>
                 </ul>
             </div>
         </div>
@@ -89,16 +194,35 @@
     </div>
     {% endfor %}
 
+    <div id="overall-progress-container">
+        <h3>Overall Progress</h3>
+        <div class="progress-container">
+            <div id="overall-progress-bar" class="progress-bar" style="width: 0%;"></div>
+        </div>
+    </div>
+
+    <a href="#" id="add-home-screen">Add to Home Screen</a>
+
     <script>
         function updateProgress(checkbox) {
             const topicName = checkbox.getAttribute('data-topic');
             const progressBar = document.getElementById(`progress-${topicName.replace(/ /g, '-')}`);
-            
+            const overallProgressBar = document.getElementById('overall-progress-bar');
+
+            // Update individual topic progress
             if (checkbox.checked) {
                 progressBar.style.width = '100%';
             } else {
                 progressBar.style.width = '0%';
             }
+
+            // Update overall progress
+            const checkboxes = document.querySelectorAll('.topic-checkbox');
+            const totalTopics = checkboxes.length;
+            const completedTopics = Array.from(checkboxes).filter(cb => cb.checked).length;
+
+            const overallProgress = (completedTopics / totalTopics) * 100;
+            overallProgressBar.style.width = `${overallProgress}%`;
         }
     </script>
 </body>

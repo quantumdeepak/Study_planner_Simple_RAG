@@ -1,0 +1,24 @@
+{
+    "1": {
+        "mcq": "Sample Multiple Choice Question",
+        "options": {
+            "a": "First Option",
+            "b": "Second Option", 
+            "c": "Third Option",
+            "d": "Fourth Option"
+        },
+        "correct": "a",
+        "explanation": "Detailed explanation for why this is the correct answer"
+    },
+    "2": {
+        "mcq": "Another Sample Question",
+        "options": {
+            "a": "Option A",
+            "b": "Option B", 
+            "c": "Option C",
+            "d": "Option D"
+        },
+        "correct": "c",
+        "explanation": "Comprehensive explanation supporting the correct choice"
+    }
+}

@@ -7,8 +7,6 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-
-
 # Configure Gemini API
 genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
 
@@ -38,8 +36,6 @@ Documents:
 
 Output Format:
 - List topics with brief description
-- Suggest initial study priority (high/medium/low)
-- Estimate complexity level
 """
     
     try:
@@ -53,8 +49,6 @@ Output Format:
                 topics.append({
                     'name': topic.strip(),
                     'description': details.strip(),
-                    'priority': 'medium',
-                    'complexity': 'moderate',
                     'completed_percentage': 0
                 })
         
@@ -62,7 +56,7 @@ Output Format:
     
     except Exception as e:
         print(f"Error generating topics: {e}")
-        return [{'name': 'General Study', 'description': 'Comprehensive study plan', 'priority': 'medium', 'complexity': 'moderate', 'completed_percentage': 0}]
+        return [{'name': 'General Study', 'description': 'Comprehensive study plan', 'completed_percentage': 0}]
 
 def generate_advanced_study_plan(documents, study_hours_per_day=2, total_weeks=4):
     """
@@ -76,87 +70,61 @@ def generate_advanced_study_plan(documents, study_hours_per_day=2, total_weeks=4
     # Generate comprehensive topics
     topics = generate_comprehensive_topics(documents)
     
-    # Use Gemini to optimize topic allocation
-    model = genai.GenerativeModel('gemini-1.5-flash-latest')
+    # Initialize study plan
+    start_date = datetime.now().date()
+    study_plan = []
     
-    topics_str = "\n".join([f"{t['name']} (Priority: {t['priority']}, Complexity: {t['complexity']})" for t in topics])
-    
-    allocation_prompt = f"""Allocate study hours for the following topics over {total_weeks} weeks:
-
-Total daily study hours: {study_hours_per_day}
-Total weekly study hours: {study_hours_per_day * 7}
-
-Topics:
-{topics_str}
-
-Instructions:
-- Distribute hours based on topic priority and complexity
-- Ensure balanced coverage across weeks
-- Include buffer time for review and challenging topics
-- Recommend specific learning activities for each topic
-
-Output Format:
-- Topic name
-- Allocated hours per week
-- Learning strategies
-- Recommended resources/approach
-"""
-    
-    try:
-        allocation_response = model.generate_content(allocation_prompt)
+    # Distribute topics across weeks
+    for week in range(1, total_weeks + 1):
+        week_plan = {
+            'week': week,
+            'start_date': (start_date + timedelta(days=(week-1)*7)).strftime("%B %d, %Y"),
+            'total_study_hours': study_hours_per_day * 7,
+            'topics': []
+        }
         
-        # Initialize study plan
-        start_date = datetime.now().date()
-        study_plan = []
+        # Calculate number of topics for this week
+        topics_this_week = topics[(week-1)::total_weeks]
         
-        for week in range(1, total_weeks + 1):
-            week_plan = {
-                'week': week,
-                'start_date': (start_date + timedelta(days=(week-1)*7)).strftime("%B %d, %Y"),
-                'total_study_hours': study_hours_per_day * 7,
-                'topics': []
-            }
-            
-            # Parse allocation response and map to topics
-            for topic in topics:
-                topic_plan = {
-                    'name': topic['name'],
-                    'description': topic['description'],
-                    'priority': topic['priority'],
-                    'complexity': topic['complexity'],
-                    'hours': study_hours_per_day,
-                    'completed_percentage': 0,
-                    'activities': [
-                        f"In-depth study of {topic['name']}",
-                        "Take comprehensive notes",
-                        "Create summary mind maps",
-                        "Practice self-assessment",
-                        "Identify knowledge gaps"
-                    ]
-                }
-                week_plan['topics'].append(topic_plan)
-            
-            # Add weekly review session
-            week_plan['topics'].append({
-                'name': 'Weekly Review and Reflection',
-                'hours': 1,
+        # If no topics left, use a generic study topic
+        if not topics_this_week:
+            topics_this_week = [{
+                'name': f'General Study Week {week}',
+                'description': 'Comprehensive review and skill consolidation'
+            }]
+        
+        for topic in topics_this_week:
+            topic_plan = {
+                'name': topic['name'],
+                'description': topic.get('description', 'No description available'),
+                'hours': study_hours_per_day,
+                'completed_percentage': 0,
                 'activities': [
-                    "Consolidate week's learning",
-                    "Review progress",
-                    "Adjust study strategy",
-                    "Plan for next week"
-                ],
-                'completed_percentage': 0
-            })
-            
-            study_plan.append(week_plan)
+                    f"In-depth study of {topic['name']}",
+                    "Take comprehensive notes",
+                    "Create summary mind maps",
+                    "Practice self-assessment",
+                    "Identify knowledge gaps"
+                ]
+            }
+            week_plan['topics'].append(topic_plan)
         
-        return study_plan
+        # Add weekly review session
+        week_plan['topics'].append({
+            'name': 'Weekly Review and Reflection',
+            'hours': 1,
+            'activities': [
+                "Consolidate week's learning",
+                "Review progress",
+                "Adjust study strategy",
+                "Plan for next week"
+            ],
+            'completed_percentage': 0
+        })
+        
+        study_plan.append(week_plan)
     
-    except Exception as e:
-        print(f"Error generating advanced study plan: {e}")
-        # Fallback to basic plan if AI generation fails
-        return generate_study_plan(documents, study_hours_per_day, total_weeks)
+    return study_plan
 
 def generate_study_plan(documents, study_hours_per_day=2, total_weeks=4):
     """

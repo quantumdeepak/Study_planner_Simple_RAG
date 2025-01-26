@@ -21,3 +21,5 @@ numpy
 #gunicorn
 
 python-dotenv
+langchain-google-genai
+langchain

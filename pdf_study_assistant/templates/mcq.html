@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Study Assistant: {{ topic }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gradient-to-br from-teal-50 to-teal-100 min-h-screen flex flex-col items-center justify-center p-4">
+    <div class="w-full max-w-3xl bg-white rounded-2xl shadow-2xl p-10">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold text-teal-600 flex items-center">
+                <i class="fas fa-graduation-cap mr-4"></i>
+                Study Assistant: {{ topic }}
+            </h1>
+            <div class="flex items-center">
+                <span class="mr-3 text-gray-600">MCQ</span>
+                <label class="switch inline-block">
+                    <input type="checkbox" id="modeToggle">
+                    <span class="slider round"></span>
+                </label>
+                <span class="ml-3 text-gray-600">Chat</span>
+            </div>
+        </div>
+        
+        <div id="mcqSection">
+            <form id="mcqForm">
+                {% for mcq in mcqs %}
+                <div class="mb-6 p-6 bg-gray-50 rounded-xl shadow-md">
+                    <h3 class="text-lg font-semibold mb-4 flex items-center">
+                        <span class="mr-3 text-teal-600">{{ loop.index }}.</span>
+                        {{ mcq.question }}
+                    </h3>
+                    
+                    <div class="space-y-3">
+                        {% for letter, choice in mcq.choices.items() %}
+                        <label class="block bg-white border border-gray-200 rounded-lg p-3 hover:bg-gray-100 transition duration-200 cursor-pointer">
+                            <input type="radio" name="q{{ loop.parent.index }}" value="{{ letter }}" class="mr-3">
+                            {{ choice }}
+                        </label>
+                        {% endfor %}
+                    </div>
+                    
+                    <div id="explanation{{ loop.index }}" class="mt-4 hidden text-sm text-gray-700 bg-blue-50 p-3 rounded-lg">
+                        <div class="font-semibold mb-2">
+                            <i class="fas fa-info-circle mr-2 text-blue-600"></i>
+                            Answer Explanation
+                        </div>
+                        <strong>Correct Answer:</strong> {{ mcq.choices[mcq.correct_answer] }}<br>
+                        <strong>Explanation:</strong> {{ mcq.explanation }}
+                    </div>
+                </div>
+                {% endfor %}
+                
+                <div class="flex justify-between mt-8 space-x-4">
+                    <button type="button" onclick="checkAnswers()" class="flex-1 bg-teal-500 text-white px-6 py-3 rounded-lg hover:bg-teal-600 transition duration-300 flex items-center justify-center">
+                        <i class="fas fa-check-circle mr-2"></i> Submit
+                    </button>
+                    <a href="{{ url_for('generate_topics') }}" class="flex-1 bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition duration-300 flex items-center justify-center">
+                        <i class="fas fa-arrow-left mr-2"></i> Back to Topics
+                    </a>
+                </div>
+
+                <div id="scoreDisplay" class="mt-6 text-center hidden"></div>
+            </form>
+        </div>
+        
+        <div id="chatSection" class="hidden">
+            <div id="chatMessages" class="h-[500px] overflow-y-auto mb-4 p-4 bg-gray-50 rounded-xl">
+                <div class="text-center text-gray-500">Start a conversation about {{ topic }}</div>
+            </div>
+            <div class="flex">
+                <input type="text" id="userInput" placeholder="Ask a question about {{ topic }}" 
+                    class="flex-grow p-3 border rounded-l-lg">
+                <button onclick="sendMessage()" 
+                    class="bg-teal-500 text-white px-6 rounded-r-lg hover:bg-teal-600">
+                    Send
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+        }
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        .slider.round {
+            border-radius: 34px;
+        }
+        .slider.round:before {
+            border-radius: 50%;
+        }
+    </style>
+
+    <script>
+        const modeToggle = document.getElementById('modeToggle');
+        const mcqSection = document.getElementById('mcqSection');
+        const chatSection = document.getElementById('chatSection');
+        const chatMessages = document.getElementById('chatMessages');
+        const userInput = document.getElementById('userInput');
+
+        modeToggle.addEventListener('change', function() {
+            if (this.checked) {
+                mcqSection.classList.add('hidden');
+                chatSection.classList.remove('hidden');
+            } else {
+                mcqSection.classList.remove('hidden');
+                chatSection.classList.add('hidden');
+            }
+        });
+
+        function addMessage(message, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('mb-4', 'p-3', 'rounded-lg');
+            
+            if (sender === 'user') {
+                messageDiv.classList.add('bg-blue-100', 'text-right');
+                messageDiv.innerHTML = `<strong>You:</strong> ${message}`;
+            } else {
+                messageDiv.classList.add('bg-gray-100');
+                messageDiv.innerHTML = `<strong>Study Assistant:</strong> ${message}`;
+            }
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function sendMessage() {
+            const message = userInput.value.trim();
+            if (message) {
+                // Add user message
+                addMessage(message, 'user');
+                userInput.value = '';
+
+                // Simulate AI response (replace with actual backend call)
+                setTimeout(() => {
+                    const aiResponse = generateAIResponse(message);
+                    addMessage(aiResponse, 'ai');
+                }, 1000);
+            }
+        }
+
+        function generateAIResponse(userMessage) {
+            const topic = "{{ topic }}";
+            const responses = [
+                `That's an interesting question about ${topic}. Let me provide some insights.`,
+                `Regarding ${topic}, here's what you should know...`,
+                `Great question! Let me break down this aspect of ${topic} for you.`,
+                `I'm happy to help you understand more about ${topic}.`
+            ];
+            return responses[Math.floor(Math.random() * responses.length)];
+        }
+
+        function checkAnswers() {
+            const mcqs = {{ mcqs|tojson }};
+            let score = 0;
+            const scoreDisplay = document.getElementById('scoreDisplay');
+            
+            mcqs.forEach((mcq, index) => {
+                const questionNumber = index + 1;
+                const selectedAnswer = document.querySelector(`input[name="q${questionNumber}"]:checked`);
+                const explanationDiv = document.getElementById(`explanation${questionNumber}`);
+                
+                explanationDiv.classList.remove('hidden');
+                
+                if (selectedAnswer && selectedAnswer.value === mcq.correct_answer) {
+                    score++;
+                    explanationDiv.innerHTML += '<br><span class="text-green-600 font-bold"><i class="fas fa-check mr-2"></i>Correct!</span>';
+                } else {
+                    explanationDiv.innerHTML += '<br><span class="text-red-600 font-bold"><i class="fas fa-times mr-2"></i>Incorrect</span>';
+                }
+            });
+            
+            scoreDisplay.innerHTML = `
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <h2 class="text-2xl font-bold mb-4 text-teal-600">
+                        <i class="fas fa-trophy mr-3"></i>
+                        Your Score: ${score} out of {{ mcqs|length }}
+                    </h2>
+                    <p class="text-gray-700">
+                        ${score === {{ mcqs|length }} ? 'Excellent job! Perfect score!' : 
+                           score >= {{ mcqs|length }} * 0.7 ? 'Great work! You did very well.' : 
+                           'Keep practicing. Review the explanations to improve.'}
+                    </p>
+                </div>
+            `;
+            scoreDisplay.classList.remove('hidden');
+        }
+
+        // Send message on Enter key
+        userInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>

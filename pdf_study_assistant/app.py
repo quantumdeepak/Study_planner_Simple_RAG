@@ -280,5 +280,166 @@ def delete_file():
     else:
         return jsonify({"error": "File not found"}), 404
 
+from study_planner import generate_study_plan
+from mcq import generate_topic_list, generate_mcqs
+
+# import google.generativeai as genai
+# from flask import render_template, jsonify, request
+# from flask import url_for
+# @app.route('/generate_topics')
+# def generate_topics():
+#     """
+#     Generate list of topics from uploaded documents
+#     """
+#     if not app_state.documents:
+#         return jsonify({"error": "No documents uploaded"}), 400
+    
+#     # Use Gemini to generate topics
+#     model = genai.GenerativeModel('gemini-1.5-flash-latest')
+    
+#     prompt = f"""From the following documents, generate a comprehensive list of 10 key topics:
+
+# Criteria for topic selection:
+# - Must be specific and actionable
+# - Derive from the core content of the documents
+# - Cover different aspects and depth levels
+# - Ensure topics are distinct and non-overlapping
+
+# Documents:
+# {' '.join(app_state.documents)[:10000]}
+
+# Output Format:
+# - Provide topics as a simple list of topic names
+# - Each topic should be concise and descriptive
+# """
+    
+#     try:
+#         response = model.generate_content(prompt)
+        
+#         # Parse topics from response
+#         topics = []
+#         for line in response.text.split('\n'):
+#             # Clean and filter topics
+#             topic = line.strip().lstrip('- ')
+#             if topic and len(topic) > 3:
+#                 topics.append(topic)
+        
+#         # Limit to 10 topics
+#         topics = topics[:10]
+        
+#         return render_template('topics.html', topics=topics)
+    
+#     except Exception as e:
+#         print(f"Error generating topics: {e}")
+#         return jsonify({"error": "Failed to generate topics"}), 500
+
+# @app.route('/generate_mcq/<topic>')
+# def generate_mcq(topic):
+#     """
+#     Generate Multiple Choice Questions for a specific topic
+#     """
+#     if not app_state.documents:
+#         return jsonify({"error": "No documents uploaded"}), 400
+    
+#     # Use Gemini to generate MCQs
+#     model = genai.GenerativeModel('gemini-1.5-flash-latest')
+    
+#     prompt = f"""Generate 10 multiple-choice questions about the topic: "{topic}"
+
+# Use the following documents as context:
+# {' '.join(app_state.documents)[:15000]}
+
+# Requirements for MCQs:
+# - Create challenging and varied questions
+# - Include 4 answer options for each question
+# - Mark the correct answer
+# - Ensure questions test different levels of understanding
+# - Cover key aspects of the topic
+
+# Output Format:
+# For each question, provide:
+# 1. Question text
+# 2. 4 options (A, B, C, D)
+# 3. Correct answer
+# 4. Brief explanation of the correct answer
+# """
+    
+#     try:
+#         response = model.generate_content(prompt)
+        
+#         # Parse MCQs
+#         mcqs = []
+#         current_mcq = {}
+#         lines = response.text.split('\n')
+        
+#         for line in lines:
+#             line = line.strip()
+#             if line.startswith('Q'):
+#                 if current_mcq:
+#                     mcqs.append(current_mcq)
+#                 current_mcq = {'question': line}
+#             elif line.startswith('A.') or line.startswith('B.') or line.startswith('C.') or line.startswith('D.'):
+#                 if 'options' not in current_mcq:
+#                     current_mcq['options'] = []
+#                 current_mcq['options'].append(line)
+#             elif line.startswith('Correct:'):
+#                 current_mcq['correct'] = line.split('Correct:')[1].strip()
+#             elif line.startswith('Explanation:'):
+#                 current_mcq['explanation'] = line.split('Explanation:')[1].strip()
+        
+#         # Add last MCQ
+#         if current_mcq:
+#             mcqs.append(current_mcq)
+        
+#         # Limit to 10 MCQs
+#         mcqs = mcqs[:10]
+        
+#         return render_template('mcq.html', topic=topic, mcqs=mcqs)
+    
+#     except Exception as e:
+#         print(f"Error generating MCQs: {e}")
+#         return jsonify({"error": "Failed to generate MCQs"}), 500
+
+
+from mcq import generate_topic_list, generate_mcqs
+@app.route('/generate_topics')
+def generate_topics():
+    """
+    Generate list of topics from uploaded documents
+    """
+    if not app_state.documents:
+        return jsonify({"error": "No documents uploaded"}), 400
+    
+    try:
+        # Use the generate_topic_list function from mcq module
+        topics = generate_topic_list(app_state.documents)
+        
+        return render_template('topics.html', topics=topics)
+    
+    except Exception as e:
+        print(f"Error generating topics: {e}")
+        return jsonify({"error": "Failed to generate topics"}), 500
+
+@app.route('/generate_mcq/<topic>')
+def generate_mcq(topic):
+    if not app_state.documents:
+        return jsonify({"error": "No documents uploaded"}), 400
+    
+    try:
+        context = ' '.join(app_state.documents)
+        chat_mode = request.args.get('mode') == 'chat'
+        
+        if chat_mode:
+            # Implement chatbot-specific logic here, e.g., context-based Q&A
+            return render_template('chat_interface.html', topic=topic)
+        
+        mcqs = generate_mcqs(topic, context)
+        return render_template('mcq.html', topic=topic, mcqs=mcqs, chat_mode=chat_mode)
+    
+    except Exception as e:
+        return jsonify({"error": f"Failed to process {topic}: {e}"}), 500
+
+
+
 if __name__ == '__main__':
     app.run(debug=True)
