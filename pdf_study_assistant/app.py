@@ -420,26 +420,82 @@ def generate_topics():
         print(f"Error generating topics: {e}")
         return jsonify({"error": "Failed to generate topics"}), 500
 
+
+
+
+# @app.route('/generate_mcq/<topic>')
+# def generate_mcq(topic):
+#     if not app_state.documents:
+#         return jsonify({"error": "No documents uploaded"}), 400
+    
+#     try:
+#         context = ' '.join(app_state.documents)
+#         mcqs = generate_mcqs(topic, context=context, number=5)
+#         return render_template('mcq.html', topic=topic, mcqs=mcqs)
+#     except Exception as e:
+#         return jsonify({"error": f"Failed to generate MCQs: {e}"}), 500
+
+
 @app.route('/generate_mcq/<topic>')
 def generate_mcq(topic):
+    mode = request.args.get('mode', 'mcq')
     if not app_state.documents:
         return jsonify({"error": "No documents uploaded"}), 400
     
     try:
         context = ' '.join(app_state.documents)
-        chat_mode = request.args.get('mode') == 'chat'
-        
-        if chat_mode:
-            # Implement chatbot-specific logic here, e.g., context-based Q&A
-            return render_template('chat_interface.html', topic=topic)
-        
-        mcqs = generate_mcqs(topic, context)
-        return render_template('mcq.html', topic=topic, mcqs=mcqs, chat_mode=chat_mode)
-    
+        if mode == 'chat':
+            return render_template('mcq.html', topic=topic, mcqs=[], mode='chat')
+        else:
+            mcqs = generate_mcqs(topic, context=context)
+            return render_template('mcq.html', topic=topic, mcqs=mcqs, mode='mcq')
     except Exception as e:
-        return jsonify({"error": f"Failed to process {topic}: {e}"}), 500
+        return jsonify({"error": f"Failed to generate content: {e}"}), 500
 
 
+
+@app.route('/clear_uploads', methods=['POST'])
+def clear_uploads():
+    try:
+        # Clear files from upload directory
+        for filename in os.listdir(app.config['UPLOAD_FOLDER']):
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            try:
+                if os.path.isfile(file_path):
+                    os.unlink(file_path)
+            except Exception as e:
+                print(f"Error deleting file {filename}: {e}")
+
+        # Reset application state
+        app_state.reset()
+        
+        return jsonify({
+            "message": "All files cleared successfully",
+            "status": "success"
+        }), 200
+    except Exception as e:
+        return jsonify({
+            "message": f"Error clearing files: {str(e)}",
+            "status": "error"
+        }), 500
+
+from chat_handler import ChatHandler
+chat_handler = ChatHandler()
+
+@app.route('/chat_message', methods=['POST'])
+def chat_message():
+    data = request.get_json()
+    topic = data.get('topic')
+    message = data.get('message')
+    is_new_chat = data.get('isNewChat', False)
+    
+    if is_new_chat:
+        context = ' '.join(app_state.documents)
+        response = chat_handler.start_chat(topic, context)
+    else:
+        response = chat_handler.handle_message(message)
+        
+    return jsonify({'response': response})
 
 if __name__ == '__main__':
     app.run(debug=True)

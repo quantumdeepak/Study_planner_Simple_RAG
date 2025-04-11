@@ -131,8 +131,8 @@
             box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
         }
     
-        /* Add to Home Screen Button */
-        #add-home-screen {
+        /* Back to Home Button */
+        .back-home {
             display: block;
             margin: 20px auto;
             padding: 12px 24px;
@@ -142,15 +142,16 @@
             text-decoration: none;
             border-radius: 6px;
             font-size: 1em;
-            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            transition: background-color 0.3s ease;
+            width: fit-content;
         }
     
-        #add-home-screen:hover {
+        .back-home:hover {
             background-color: #0056b3;
-            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+            text-decoration: none;
+            color: white;
         }
     </style>
-    
 
 </head>
 <body>
@@ -183,10 +184,9 @@
             <div class="activities">
                 <strong>Activities:</strong>
                 <ul>
-                    <li>In-depth study of the topic</li>
-                    <li>Create summary notes</li>
-                    <li>Practice self-assessment</li>
-                    <li>Identify and fill knowledge gaps</li>
+                    {% for activity in topic.activities %}
+                        <li>{{ activity }}</li>
+                    {% endfor %}
                 </ul>
             </div>
         </div>
@@ -201,7 +201,7 @@
         </div>
     </div>
 
-    <a href="#" id="add-home-screen">Add to Home Screen</a>
+    <a href="/" class="back-home">Back to Home</a>
 
     <script>
         function updateProgress(checkbox) {

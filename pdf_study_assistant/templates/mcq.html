@@ -8,6 +8,7 @@
 </head>
 <body class="bg-gradient-to-br from-teal-50 to-teal-100 min-h-screen flex flex-col items-center justify-center p-4">
     <div class="w-full max-w-3xl bg-white rounded-2xl shadow-2xl p-10">
+        <!-- Header with Toggle -->
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-3xl font-bold text-teal-600 flex items-center">
                 <i class="fas fa-graduation-cap mr-4"></i>
@@ -16,14 +17,15 @@
             <div class="flex items-center">
                 <span class="mr-3 text-gray-600">MCQ</span>
                 <label class="switch inline-block">
-                    <input type="checkbox" id="modeToggle">
+                    <input type="checkbox" id="modeToggle" {% if request.args.get('mode') == 'chat' %}checked{% endif %}>
                     <span class="slider round"></span>
                 </label>
                 <span class="ml-3 text-gray-600">Chat</span>
             </div>
         </div>
-        
-        <div id="mcqSection">
+
+        <!-- MCQ Section -->
+        <div id="mcqSection" class="{{ 'hidden' if request.args.get('mode') == 'chat' else '' }}">
             <form id="mcqForm">
                 {% for mcq in mcqs %}
                 <div class="mb-6 p-6 bg-gray-50 rounded-xl shadow-md">
@@ -35,7 +37,7 @@
                     <div class="space-y-3">
                         {% for letter, choice in mcq.choices.items() %}
                         <label class="block bg-white border border-gray-200 rounded-lg p-3 hover:bg-gray-100 transition duration-200 cursor-pointer">
-                            <input type="radio" name="q{{ loop.parent.index }}" value="{{ letter }}" class="mr-3">
+                            <input type="radio" name="q{{ loop.index }}" value="{{ letter }}" class="mr-3">
                             {{ choice }}
                         </label>
                         {% endfor %}
@@ -64,18 +66,30 @@
                 <div id="scoreDisplay" class="mt-6 text-center hidden"></div>
             </form>
         </div>
-        
-        <div id="chatSection" class="hidden">
-            <div id="chatMessages" class="h-[500px] overflow-y-auto mb-4 p-4 bg-gray-50 rounded-xl">
-                <div class="text-center text-gray-500">Start a conversation about {{ topic }}</div>
+
+        <!-- Chat Section -->
+        <div id="chatSection" class="{{ '' if request.args.get('mode') == 'chat' else 'hidden' }}">
+            <div id="chatMessages" class="h-[500px] overflow-y-auto mb-4 p-4 bg-gray-50 rounded-xl whitespace-pre-wrap">
+                <div class="text-center text-gray-500">Starting chat about {{ topic }}...</div>
             </div>
-            <div class="flex">
-                <input type="text" id="userInput" placeholder="Ask a question about {{ topic }}" 
-                    class="flex-grow p-3 border rounded-l-lg">
+            <div class="flex space-x-2">
+                <input type="text" id="userInput" 
+                    placeholder="Type your message here..." 
+                    class="flex-grow p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
                 <button onclick="sendMessage()" 
-                    class="bg-teal-500 text-white px-6 rounded-r-lg hover:bg-teal-600">
-                    Send
+                    class="bg-teal-500 text-white px-6 py-3 rounded-lg hover:bg-teal-600 transition duration-300">
+                    <i class="fas fa-paper-plane"></i>
                 </button>
+            </div>
+            <div class="mt-4 flex justify-between">
+                <button onclick="endChat()" 
+                    class="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition duration-300">
+                    End Chat
+                </button>
+                <a href="/" 
+                    class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition duration-300">
+                    Back to Home
+                </a>
             </div>
         </div>
     </div>
@@ -124,6 +138,21 @@
         .slider.round:before {
             border-radius: 50%;
         }
+        .message {
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            white-space: pre-wrap;
+        }
+        .user-message {
+            background-color: #e8f5e9;
+            margin-left: 20%;
+            text-align: right;
+        }
+        .assistant-message {
+            background-color: #e3f2fd;
+            margin-right: 20%;
+        }
     </style>
 
     <script>
@@ -132,58 +161,23 @@
         const chatSection = document.getElementById('chatSection');
         const chatMessages = document.getElementById('chatMessages');
         const userInput = document.getElementById('userInput');
+        let isNewChat = true;
+
+        // Set initial state based on URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const mode = urlParams.get('mode');
+        if (mode === 'chat') {
+            modeToggle.checked = true;
+            if (isNewChat) {
+                startNewChat();
+            }
+        }
 
         modeToggle.addEventListener('change', function() {
-            if (this.checked) {
-                mcqSection.classList.add('hidden');
-                chatSection.classList.remove('hidden');
-            } else {
-                mcqSection.classList.remove('hidden');
-                chatSection.classList.add('hidden');
-            }
+            // Redirect to appropriate mode
+            const newMode = this.checked ? 'chat' : 'mcq';
+            window.location.href = `${window.location.pathname}?mode=${newMode}`;
         });
-
-        function addMessage(message, sender) {
-            const messageDiv = document.createElement('div');
-            messageDiv.classList.add('mb-4', 'p-3', 'rounded-lg');
-            
-            if (sender === 'user') {
-                messageDiv.classList.add('bg-blue-100', 'text-right');
-                messageDiv.innerHTML = `<strong>You:</strong> ${message}`;
-            } else {
-                messageDiv.classList.add('bg-gray-100');
-                messageDiv.innerHTML = `<strong>Study Assistant:</strong> ${message}`;
-            }
-            
-            chatMessages.appendChild(messageDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        function sendMessage() {
-            const message = userInput.value.trim();
-            if (message) {
-                // Add user message
-                addMessage(message, 'user');
-                userInput.value = '';
-
-                // Simulate AI response (replace with actual backend call)
-                setTimeout(() => {
-                    const aiResponse = generateAIResponse(message);
-                    addMessage(aiResponse, 'ai');
-                }, 1000);
-            }
-        }
-
-        function generateAIResponse(userMessage) {
-            const topic = "{{ topic }}";
-            const responses = [
-                `That's an interesting question about ${topic}. Let me provide some insights.`,
-                `Regarding ${topic}, here's what you should know...`,
-                `Great question! Let me break down this aspect of ${topic} for you.`,
-                `I'm happy to help you understand more about ${topic}.`
-            ];
-            return responses[Math.floor(Math.random() * responses.length)];
-        }
 
         function checkAnswers() {
             const mcqs = {{ mcqs|tojson }};
@@ -191,9 +185,8 @@
             const scoreDisplay = document.getElementById('scoreDisplay');
             
             mcqs.forEach((mcq, index) => {
-                const questionNumber = index + 1;
-                const selectedAnswer = document.querySelector(`input[name="q${questionNumber}"]:checked`);
-                const explanationDiv = document.getElementById(`explanation${questionNumber}`);
+                const selectedAnswer = document.querySelector(`input[name="q${index + 1}"]:checked`);
+                const explanationDiv = document.getElementById(`explanation${index + 1}`);
                 
                 explanationDiv.classList.remove('hidden');
                 
@@ -209,11 +202,11 @@
                 <div class="bg-white p-6 rounded-xl shadow-lg">
                     <h2 class="text-2xl font-bold mb-4 text-teal-600">
                         <i class="fas fa-trophy mr-3"></i>
-                        Your Score: ${score} out of {{ mcqs|length }}
+                        Your Score: ${score} out of ${mcqs.length}
                     </h2>
                     <p class="text-gray-700">
-                        ${score === {{ mcqs|length }} ? 'Excellent job! Perfect score!' : 
-                           score >= {{ mcqs|length }} * 0.7 ? 'Great work! You did very well.' : 
+                        ${score === mcqs.length ? 'Excellent job! Perfect score!' : 
+                           score >= mcqs.length * 0.7 ? 'Great work! You did very well.' : 
                            'Keep practicing. Review the explanations to improve.'}
                     </p>
                 </div>
@@ -221,7 +214,79 @@
             scoreDisplay.classList.remove('hidden');
         }
 
-        // Send message on Enter key
+        function startNewChat() {
+            fetch('/chat_message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    topic: '{{ topic }}',
+                    isNewChat: true
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                addMessage(data.response, 'assistant');
+                isNewChat = false;
+            });
+        }
+
+        function addMessage(message, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', sender === 'user' ? 'user-message' : 'assistant-message');
+            messageDiv.textContent = message;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function sendMessage() {
+            const message = userInput.value.trim();
+            if (!message) return;
+
+            addMessage(message, 'user');
+            userInput.value = '';
+
+            fetch('/chat_message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    topic: '{{ topic }}',
+                    message: message,
+                    isNewChat: false
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                addMessage(data.response, 'assistant');
+            });
+        }
+
+        async function endChat() {
+            addMessage("Thanks bye!", 'user');
+            const response = await fetch('/chat_message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    topic: '{{ topic }}',
+                    message: 'thanks bye',
+                    isNewChat: false
+                })
+            });
+            const data = await response.json();
+            addMessage(data.response, 'assistant');
+            isNewChat = true;
+            
+            // Disable input after chat ends
+            userInput.disabled = true;
+            document.querySelector('button[onclick="sendMessage()"]').disabled = true;
+        }
+
+        // Handle Enter key press
         userInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 sendMessage();

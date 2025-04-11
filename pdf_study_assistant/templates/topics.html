@@ -1,38 +1,3 @@
-<!-- <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Study Topics</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-</head>
-<body class="bg-gradient-to-br from-purple-50 to-purple-100 min-h-screen flex flex-col items-center justify-center p-4">
-    <div class="w-full max-w-3xl bg-white rounded-2xl shadow-2xl p-10">
-        <h1 class="text-4xl font-bold text-center text-purple-600 mb-10 flex items-center justify-center">
-            <i class="fas fa-book-open mr-4"></i>
-            Study Topics
-        </h1>
-        
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {% for topic in topics %}
-                <a href="{{ url_for('generate_mcq', topic=topic) }}" class="block transform transition duration-300 hover:scale-105">
-                    <div class="bg-purple-500 text-white p-6 rounded-xl shadow-md hover:bg-purple-600 transition duration-300 text-center flex flex-col items-center justify-center space-y-3">
-                        <i class="fas fa-lightbulb text-3xl"></i>
-                        <span class="font-semibold text-lg">{{ topic }}</span>
-                    </div>
-                </a>
-            {% endfor %}
-        </div>
-        
-        <div class="mt-10 text-center">
-            <a href="/" class="bg-gray-500 text-white px-8 py-3 rounded-lg hover:bg-gray-600 transition duration-300 flex items-center justify-center w-full max-w-xs mx-auto">
-                <i class="fas fa-arrow-left mr-2"></i> Back to Home
-            </a>
-        </div>
-    </div>
-</body>
-</html> -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -48,20 +13,16 @@
                 <i class="fas fa-book-open mr-4"></i>
                 Study Topics
             </h1>
-            <div class="flex items-center">
-                <span class="mr-3 text-gray-600">MCQ</span>
-                <label class="switch inline-block">
-                    <input type="checkbox" id="modeToggle">
-                    <span class="slider round"></span>
-                </label>
-                <span class="ml-3 text-gray-600">Chat</span>
+            <div class="flex items-center bg-gray-100 rounded-lg p-1">
+                <button id="mcqBtn" class="px-4 py-2 rounded-md font-medium transition-all duration-200 active">MCQ Mode</button>
+                <button id="chatBtn" class="px-4 py-2 rounded-md font-medium transition-all duration-200">Chat Mode</button>
             </div>
         </div>
         
         <div id="mcqTopics">
             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {% for topic in topics %}
-                    <a href="{{ url_for('generate_mcq', topic=topic) }}" class="block transform transition duration-300 hover:scale-105 mcq-topic-link">
+                    <a href="{{ url_for('generate_mcq', topic=topic) }}?mode=mcq" class="block transform transition duration-300 hover:scale-105">
                         <div class="bg-purple-500 text-white p-6 rounded-xl shadow-md hover:bg-purple-600 transition duration-300 text-center flex flex-col items-center justify-center space-y-3">
                             <i class="fas fa-lightbulb text-3xl"></i>
                             <span class="font-semibold text-lg">{{ topic }}</span>
@@ -74,7 +35,7 @@
         <div id="chatTopics" class="hidden">
             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {% for topic in topics %}
-                    <a href="{{ url_for('generate_mcq', topic=topic) }}?mode=chat" class="block transform transition duration-300 hover:scale-105 chat-topic-link">
+                    <a href="{{ url_for('generate_mcq', topic=topic) }}?mode=chat" class="block transform transition duration-300 hover:scale-105">
                         <div class="bg-teal-500 text-white p-6 rounded-xl shadow-md hover:bg-teal-600 transition duration-300 text-center flex flex-col items-center justify-center space-y-3">
                             <i class="fas fa-comments text-3xl"></i>
                             <span class="font-semibold text-lg">{{ topic }}</span>
@@ -92,69 +53,38 @@
     </div>
 
     <style>
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 60px;
-            height: 34px;
-        }
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: .4s;
-        }
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 26px;
-            width: 26px;
-            left: 4px;
-            bottom: 4px;
+        .active {
             background-color: white;
-            transition: .4s;
-        }
-        input:checked + .slider {
-            background-color: #2196F3;
-        }
-        input:checked + .slider:before {
-            transform: translateX(26px);
-        }
-        .slider.round {
-            border-radius: 34px;
-        }
-        .slider.round:before {
-            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
     </style>
 
     <script>
-        const modeToggle = document.getElementById('modeToggle');
+        const mcqBtn = document.getElementById('mcqBtn');
+        const chatBtn = document.getElementById('chatBtn');
         const mcqTopics = document.getElementById('mcqTopics');
         const chatTopics = document.getElementById('chatTopics');
-        const mcqTopicLinks = document.querySelectorAll('.mcq-topic-link');
-        const chatTopicLinks = document.querySelectorAll('.chat-topic-link');
 
-        modeToggle.addEventListener('change', function() {
-            if (this.checked) {
-                mcqTopics.classList.add('hidden');
-                chatTopics.classList.remove('hidden');
-            } else {
-                mcqTopics.classList.remove('hidden');
-                chatTopics.classList.add('hidden');
-            }
+        mcqBtn.addEventListener('click', () => {
+            mcqBtn.classList.add('active');
+            chatBtn.classList.remove('active');
+            mcqTopics.classList.remove('hidden');
+            chatTopics.classList.add('hidden');
         });
+
+        chatBtn.addEventListener('click', () => {
+            chatBtn.classList.add('active');
+            mcqBtn.classList.remove('active');
+            chatTopics.classList.remove('hidden');
+            mcqTopics.classList.add('hidden');
+        });
+
+        // Set initial state based on URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const mode = urlParams.get('mode');
+        if (mode === 'chat') {
+            chatBtn.click();
+        }
     </script>
 </body>
-</html> -->
-
-
+</html>
